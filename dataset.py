@@ -1,79 +1,69 @@
-#https://towardsdatascience.com/vaes-generating-images-with-tensorflow-61de08e82f1f
-
 import numpy as np
 import tensorflow as tf
 import gym
 from PIL import Image as PilImage
-tfd = tf.contrib.distributions
 import matplotlib.pyplot as plt 
+from matplotlib.pyplot import imshow
+import pickle
+import os
+from scipy.misc import imresize as resize
+
 
 class Dataset(object):
     
-    def __init__(self,env_id,db_size,frame_shape,batch_size):
-        self.env_id = env_id # Name env on open ai gym
-        self.size_dataset = db_size # number of frames to collect
-        self.batch_size = batch_size # batch size
-        self.frame_shape = frame_shape  # final shape for each frame [64,64]
+    def __init__(self,env,dataset_size,frame_shape,batch_size):
+        self.env = env
+        self.dataset_size = dataset_size
+        self.frame_shape = frame_shape
+        self.batch_size = batch_size
+        self.dataset = None
 
-        self.env = gym.make(env_id)
-        self.frames = [] # list of frames to collect
-
-        self.iterator = None
-        self.input_batch = None
-
-        self.create_dataset()
+        self.make_dataset()
+        self.num_batchs = int(np.floor(dataset_size/batch_size))
+        #imgplot = plt.imshow(self.dataset[3])
+        #plt.show()
+    
+    def make_dataset(self):
+        pickle_dump_name = os.listdir('dataset')
         
-    
-    def create_dataset(self):
-        obs = self.env.reset()
-        for itr in range(self.size_dataset):
-            obs,rew,done,_ = self.env.step(self.env.action_space.sample()) # take a random action
-            obs = obs[25:195, 10:, :]# crop image
-            obs = np.array(PilImage.fromarray(obs,'RGB').resize((self.frame_shape[0],self.frame_shape[1]))) #resize img
-            self.frames.append(obs)
-        self.env.close()
-        self.frames = np.stack(self.frames)
-       
-        #turn list of frames to tensorflow dataset type
-        with tf.variable_scope("DataPipe"):
-            #create a dataset whose elements are the frames collected
-            dataset = tf.data.Dataset.from_tensor_slices(self.frames)
-            #Convert each image of dataset to dtype
-            dataset = dataset.map(lambda x: tf.image.convert_image_dtype([x], dtype=tf.float32))
-            #split dataset in batches
-            dataset = dataset.batch(batch_size=self.batch_size).prefetch(self.batch_size)
-            
-            # create an iterator over the dataset
-            self.iterator = dataset.make_initializable_iterator()
-            #get a batch of data
-            self.input_batch = self.iterator.get_next()
-            # reshape from (?, 1, frame_shape[0], frame_shape[1], 3) to (?, , frame_shape[0], frame_shape[1], 3)
-            self.input_batch = tf.reshape(self.input_batch, shape=[-1, self.frame_shape[0], self.frame_shape[1], 3])
-    
+        #check if a pickle dump already exists. If not create it
+        if pickle_dump_name:
+            with open("dataset/"+pickle_dump_name[0], 'rb') as data:
+                self.dataset = pickle.load(data)
+                print("Dataset loaded")
+                print("Dataset size: ",self.dataset.shape)
+        else:                
+            frames = []
+            obs = self.env.reset()
+            for itr in range(self.dataset_size):
+                #self.env.render()
+                obs,rew,done,_ = self.env.step(self.env.action_space.sample()) # take a random action
+                
+                obs = np.array(obs[0:400, :, :]).astype(np.float)/255.0
+                obs = np.array(resize(obs, (self.frame_shape[0], self.frame_shape[1])))
+                obs = ((1.0 - obs) * 255).round().astype(np.uint8)
+                
+                frames.append(obs)
+                if done:
+                    self.env.reset()
+            self.env.close() #non ho finito con l' env
 
-    
+            #from len = 1000 to shape = (1000, 64, 64, 3)
+            self.dataset = np.stack(frames)
 
-    def test_dataset(self):
-        init_vars = [tf.local_variables_initializer(), tf.global_variables_initializer()]
-        with tf.Session() as sess:
-            sess.run([init_vars, self.iterator.initializer]) # Initialize variables and the iterator
-            while 1:    # Iterate until we get out of range error!
-                try:
-                    batch = sess.run(self.input_batch)
-                    print(batch.shape)  # Get batch dimensions
-                    plt.imshow(batch[0,:,:,0])
-                    plt.show()
-                except tf.errors.OutOfRangeError:  # This exception is triggered when all batches are iterated
-                    print('All batches have been iterated!')
-                    break
-    
-    
-    def get_single_batch(self):
-        init_vars = [tf.local_variables_initializer(), tf.global_variables_initializer()]
-        with tf.Session() as sess:
-            sess.run([init_vars, self.iterator.initializer]) # Initialize variables and the iterator
-            try:
-                batch = sess.run(self.input_batch)
-            except tf.errors.OutOfRangeError:  # This exception is triggered when all batches are iterated
-                print('All batches have been iterated!')
-        return batch
+            with open('dataset/dump_frames.pickle', 'wb') as output:
+                pickle.dump(self.dataset, output)
+
+            print("Dataset size: ",self.dataset.shape)
+
+    # split dataset into batches
+    def get_batchs(self):
+        batches = []
+        np.random.shuffle(self.dataset)
+        for idx in range(self.num_batchs):
+            data = self.dataset[idx*self.batch_size:(idx+1)*self.batch_size]
+            batches.append(data.astype(np.float)/255.0)
+        return batches
+
+
+        
