@@ -132,17 +132,18 @@ class VAE(object):
         
         return img_loss,kl_loss,loss,optimizer
 
-    def train_vae(self):
+    def train_vae(self, checkpoint = False):
         for epoch in range(self.train_epochs):
             print("\n Epoch: ", epoch)
             batchs = self.dataset.get_batchs()
             for b in batchs:
                 #loss_value,kl_loss_value, img_loss_value,_ = sess.run([loss, kl_loss, img_loss, optimizer], {input_batch: b})
                 img_loss_value,kl_loss_value,loss_value,_ = self.sess.run([self.img_loss,self.kl_loss,self.loss,self.optimizer], {self.input_batch: b})
-                
                 print("loss_value: ", loss_value)
                 #print("kl_loss_value: ", kl_loss_value)
                 #print("img_loss_value: ", img_loss_value)
+            if checkpoint:
+                self.save_json()
 
     def get_encoded_vec(self,img):
         input_frame = img.reshape(1, 64, 64, 3)
@@ -192,11 +193,13 @@ class VAE(object):
             qparams.append(p)
         with open(jsonfile, 'wt') as outfile:
             json.dump(qparams, outfile, sort_keys=True, indent=0, separators=(',', ': '))
+        print("Model saved!")
 
     def load_json(self, jsonfile='models/vae.json'):
         with open(jsonfile, 'r') as f:
             params = json.load(f)
         self.set_model_params(params)
+        print("Model loaded!")
 
     def set_model_params(self, params):
         t_vars = tf.trainable_variables()

@@ -19,14 +19,14 @@ pip install -e .
 
 #Dataset
 #env_id = 'Freeway-v0'
-dataset_size = 100000
+dataset_size = 1000
 frame_shape = [64,64]
 batch_size = 100
 
 #VAE
 latent_size = 64
 learning_rate = 0.00005
-train_epochs = 10
+train_epochs = 50
 
 # Instanziazione
 env = gym.make('VizdoomTakeCover-v0')
@@ -34,10 +34,10 @@ dataset = dataset.Dataset(env,dataset_size,frame_shape,batch_size)
 vae = vae.VAE(latent_size, learning_rate,train_epochs,frame_shape,dataset)
 
 vae.load_json()
-#vae.train_vae()
+#vae.train_vae(checkpoint = True)
 #vae.save_json()
 
-choosed_img = dataset.dataset[130]
+choosed_img = dataset.dataset[814]
 latent_v = vae.get_encoded_vec(choosed_img)
 recontructed_img = vae.decode_latent_vec(latent_v)
 recontructed_img = np.round(recontructed_img * 255.).astype(np.uint8)
