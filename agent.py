@@ -1,9 +1,14 @@
+#import os
+#2 = INFO and WARNING messages are not printed
+#os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' 
+
 import numpy as np
 import gym
 import dataset #my file
 import vae #my file
 import matplotlib.pyplot as plt
 import vizdoomgym
+
 
 '''
 before run:
@@ -20,25 +25,19 @@ batch_size = 100
 
 #VAE
 latent_size = 64
-learning_rate = 0.0001
-train_epochs = 3
-
-#Plot
-img_to_plot = 5
-
+learning_rate = 0.00005
+train_epochs = 10
 
 # Instanziazione
 env = gym.make('VizdoomTakeCover-v0')
 dataset = dataset.Dataset(env,dataset_size,frame_shape,batch_size)
 vae = vae.VAE(latent_size, learning_rate,train_epochs,frame_shape,dataset)
-vae.train_vae()
-print("fine addestramento vae")
-#vae.save_json()
 
-#test vae
 vae.load_json()
+vae.train_vae()
+vae.save_json()
 
-choosed_img = dataset.dataset[5]
+choosed_img = dataset.dataset[70]
 latent_v = vae.get_encoded_vec(choosed_img)
 recontructed_img = vae.decode_latent_vec(latent_v)
 recontructed_img = np.round(recontructed_img * 255.).astype(np.uint8)

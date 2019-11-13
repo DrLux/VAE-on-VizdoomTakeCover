@@ -9,7 +9,6 @@ import json
 
 class VAE(object):
     def __init__(self, latent_size, learning_rate,train_epochs,frame_shape,dataset):
-        self.kl_tolerance=0.5 #when stop to optimize the kl-loss
         self.latent_size = latent_size
         self.learning_rate = learning_rate
         self.train_epochs = train_epochs
@@ -37,7 +36,7 @@ class VAE(object):
 
         #Init Session
         init_vars = [tf.local_variables_initializer(), tf.global_variables_initializer()]
-        gpu_options = tf.GPUOptions(allow_growth=False)
+        gpu_options = tf.GPUOptions(allow_growth=True)
         self.sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
         self.sess.run(init_vars)
 
@@ -116,10 +115,6 @@ class VAE(object):
             # formula: https://blog.fastforwardlabs.com/2016/08/22/under-the-hood-of-the-variational-autoencoder-in.html
             kl_loss = - 0.5 * tf.reduce_sum((1 + tf.log(tf.square(latent_std_dev)) - tf.square(latent_mean) - tf.square(latent_std_dev)), reduction_indices = 1)
 
-            
-            # check tolerance
-            kl_loss = tf.maximum(kl_loss, self.kl_tolerance * self.latent_size)
-            
             kl_loss = tf.reduce_mean(kl_loss)
 
             loss = img_loss + kl_loss

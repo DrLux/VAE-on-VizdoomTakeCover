@@ -41,7 +41,7 @@ class Dataset(object):
                 
                 obs = np.array(obs[0:400, :, :]).astype(np.float)/255.0
                 obs = np.array(resize(obs, (self.frame_shape[0], self.frame_shape[1])))
-                obs = ((1.0 - obs) * 255).round().astype(np.uint8)
+                #obs = ((1.0 - obs) * 255).round().astype(np.uint8)
                 
                 frames.append(obs)
                 if done:
