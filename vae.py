@@ -1,3 +1,6 @@
+#import os
+#os.environ["CUDA_VISIBLE_DEVICES"]="0"
+
 import numpy as np
 #import tensorflow as tf
 import matplotlib.pyplot as plt 
@@ -65,8 +68,13 @@ class VAE(object):
 
             
             # std_dev mus be always > 0, so we use softplus to force it
-            latent_std_dev = tf.nn.softplus(tf.layers.dense(last_layer, units=self.latent_size, reuse=tf.AUTO_REUSE), name='std_dev',)  
+            #latent_std_dev = tf.nn.softplus(tf.layers.dense(last_layer, units=self.latent_size, reuse=tf.AUTO_REUSE), name='std_dev',)  
             #Tensor("Encoder/add:0", shape=(batch_size, 8), dtype=float32)
+
+            #PROVO A RIFARE LA st_dev
+            latent_std_dev = tf.layers.dense(last_layer, units=self.latent_size, reuse=tf.AUTO_REUSE)
+            sigma = tf.exp(latent_std_dev / 2.0)
+            latent_std_dev = sigma
 
         return latent_mean,latent_std_dev
 
@@ -113,13 +121,15 @@ class VAE(object):
                 
             # kl loss for two gaussian
             # formula: https://blog.fastforwardlabs.com/2016/08/22/under-the-hood-of-the-variational-autoencoder-in.html
-            kl_loss = - 0.5 * tf.reduce_sum((1 + tf.log(tf.square(latent_std_dev)) - tf.square(latent_mean) - tf.square(latent_std_dev)), reduction_indices = 1)
+            #kl_loss = - 0.5 * tf.reduce_sum((1 + tf.log(tf.square(latent_std_dev)) - tf.square(latent_mean) - tf.square(latent_std_dev)), reduction_indices = 1)
 
+            ###kl-loss from hardmaru "world_model" repo
+            kl_loss = - 0.5 * tf.reduce_sum((1 + latent_std_dev - tf.square(latent_mean) - tf.exp(latent_std_dev)),reduction_indices = 1)          
             kl_loss = tf.reduce_mean(kl_loss)
 
             loss = img_loss + kl_loss
-            
             optimizer = tf.train.AdamOptimizer(self.learning_rate).minimize(loss)
+        
         return img_loss,kl_loss,loss,optimizer
 
     def train_vae(self):

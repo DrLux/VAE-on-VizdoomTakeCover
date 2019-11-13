@@ -41,11 +41,13 @@ class Dataset(object):
                 
                 obs = np.array(obs[0:400, :, :]).astype(np.float)/255.0
                 obs = np.array(resize(obs, (self.frame_shape[0], self.frame_shape[1])))
-                #obs = ((1.0 - obs) * 255).round().astype(np.uint8)
+                obs = ((1.0 - obs) * 255).round().astype(np.uint8)
                 
                 frames.append(obs)
                 if done:
                     self.env.reset()
+                if itr % 1000 == 0:
+                    print("Dumped ", itr, " frames!")
             self.env.close() #non ho finito con l' env
 
             #from len = 1000 to shape = (1000, 64, 64, 3)

@@ -34,13 +34,14 @@ dataset = dataset.Dataset(env,dataset_size,frame_shape,batch_size)
 vae = vae.VAE(latent_size, learning_rate,train_epochs,frame_shape,dataset)
 
 vae.load_json()
-vae.train_vae()
-vae.save_json()
+#vae.train_vae()
+#vae.save_json()
 
-choosed_img = dataset.dataset[70]
+choosed_img = dataset.dataset[130]
 latent_v = vae.get_encoded_vec(choosed_img)
 recontructed_img = vae.decode_latent_vec(latent_v)
 recontructed_img = np.round(recontructed_img * 255.).astype(np.uint8)
+
 recontructed_img = recontructed_img.reshape(64, 64, 3)
 
 imgplot = plt.imshow(choosed_img)
