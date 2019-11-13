@@ -13,26 +13,14 @@ before run install vizdoom:
     pip install -e .
 '''
 
-#HyperParameters
-#Dataset
-dataset_size = 1000
-frame_shape = [64,64]
-batch_size = 100
-
-#VAE
-latent_size = 64
-learning_rate = 0.00005
-train_epochs = 3
-
-
 # Init
 env = gym.make('VizdoomTakeCover-v0')
-dataset = dataset.Dataset(env,dataset_size,frame_shape,batch_size)
+dataset = dataset.Dataset(env,frame_shape)
 
 #dataset.create_new_dataset()
 dataset.load_dataset()
 
-vae = vae.VAE(latent_size, learning_rate,train_epochs,frame_shape,dataset)
+vae = vae.VAE(frame_shape,dataset)
 
 vae.load_json()
 vae.train_vae(checkpoint = False)

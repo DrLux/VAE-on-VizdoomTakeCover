@@ -6,13 +6,18 @@ import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
 import json
 
+#VAE hyperparameters
+LATENT_SIZE = 64
+LEARNING_RATE = 0.00005
+TRAIN_EPOCHS = 3 #10 default 
+
 
 class VAE(object):
     
-    def __init__(self, latent_size, learning_rate,train_epochs,frame_shape,dataset):
-        self.latent_size = latent_size
-        self.learning_rate = learning_rate
-        self.train_epochs = train_epochs
+    def __init__(self,frame_shape,dataset):
+        self.latent_size = LATENT_SIZE
+        self.learning_rate = LEARNING_RATE
+        self.train_epochs = TRAIN_EPOCHS
         self.frame_shape = frame_shape
         self.dataset = dataset
         self.assign_ops = {} #dictionary to collect assignment operations to reload the model weights

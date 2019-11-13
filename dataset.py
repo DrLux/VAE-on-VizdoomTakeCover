@@ -8,14 +8,18 @@ import pickle
 import os
 from scipy.misc import imresize as resize
 
+#Dataset hyperparameters
+DATASET_SIZE = 1000
+BATCH_SIZE = 100
+
 
 class Dataset(object):
     
-    def __init__(self,env,dataset_size,frame_shape,batch_size):
+    def __init__(self,env,frame_shape):
         self.env = env
-        self.dataset_size = dataset_size
+        self.dataset_size = DATASET_SIZE
         self.frame_shape = frame_shape
-        self.batch_size = batch_size
+        self.batch_size = BATCH_SIZE
         
         self.dataset = None
         self.num_batches = 0
@@ -29,7 +33,7 @@ class Dataset(object):
         return obs
         
 
-    def create_new_dataset(self):
+    def create_new_dataset(self, temporary = True):
         frames = []
         obs = self.env.reset()
         for itr in range(self.dataset_size):
@@ -49,8 +53,9 @@ class Dataset(object):
         self.dataset = np.stack(frames)
 
         #dump created dataset into picle file
-        with open('dataset/new_dataset.pickle', 'wb') as output:
-            pickle.dump(self.dataset, output)
+        if not temporary:
+            with open('dataset/new_dataset.pickle', 'wb') as output:
+                pickle.dump(self.dataset, output)
 
         print("Dataset size: ",self.dataset.shape)
         self.num_batches = int(np.floor(self.dataset.shape[0]/self.batch_size))
