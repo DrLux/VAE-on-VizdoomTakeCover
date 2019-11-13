@@ -1,15 +1,17 @@
 # VAE on VizdoomTakeCover
 Convolutional Variational Autoencoder on VizdoomTakeCover
 
-In this repository I implemented a Convolutional Variational Autoencoder on frames captured from vizdoom environment.
+![vae_scheme](https://worldmodels.github.io/assets/vae.svg)
+
+In this repository I implemented a Convolutional Variational Autoencoder on frames acquired from the VizDoom environment.
 
 My work is based on: https://worldmodels.github.io/
 
-![vae_scheme](https://worldmodels.github.io/assets/vae.svg)
+# Real Frame 
+![real_frame](https://github.com/DrLux/POC-VAE/blob/master/original.png?raw=true)
 
-I use the same parameters:
-![network_parameters](https://worldmodels.github.io/assets/conv_vae_label.svg)
+# Reconstructed Frame from my VAE
+![my_frame](https://github.com/DrLux/POC-VAE/blob/master/reconstructed.png?raw=true)
 
-![notebook_screen](https://github.com/DrLux/POC-VAE/blob/master/test_vae_notebook.png?raw=true)
 
 In future I will add MDN-RNN module.
