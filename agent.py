@@ -13,17 +13,19 @@ before run install vizdoom:
     pip install -e .
 '''
 
+FRAME_SHAPE = [64,64]
+
 # Init
 env = gym.make('VizdoomTakeCover-v0')
-dataset = dataset.Dataset(env,frame_shape)
+dataset = dataset.Dataset(env,FRAME_SHAPE)
 
-#dataset.create_new_dataset()
+#dataset.create_new_dataset(temporary=False)
 dataset.load_dataset()
 
-vae = vae.VAE(frame_shape,dataset)
+vae = vae.VAE(FRAME_SHAPE,dataset)
 
 vae.load_json()
-vae.train_vae(checkpoint = False)
+vae.train_vae(checkpoint = True)
 vae.save_json()
 
 

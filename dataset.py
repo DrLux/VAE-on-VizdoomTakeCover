@@ -9,7 +9,7 @@ import os
 from scipy.misc import imresize as resize
 
 #Dataset hyperparameters
-DATASET_SIZE = 1000
+DATASET_SIZE = 100000
 BATCH_SIZE = 100
 
 
@@ -70,6 +70,7 @@ class Dataset(object):
 
         # Load all dataset in folder
         for dset_name in pickle_dump_name:
+            print("dset_name: ",dset_name)
             with open("dataset/"+dset_name, 'rb') as data:
                 temp_dataset = pickle.load(data)
                 dataset_collection.append(temp_dataset)
