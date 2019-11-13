@@ -5,7 +5,7 @@ Convolutional Variational Autoencoder on VizdoomTakeCover
 
 In this repository I implemented a Convolutional Variational Autoencoder on frames acquired from the VizDoom environment.
 
-Before starting you need to install vizdoomgym: 
+Before getting started, you need to install vizdoomgym: 
 https://github.com/simontudo/vizdoomgym
 
 My work is based on: https://worldmodels.github.io/
